@@ -7,17 +7,20 @@ import math
 
 wartoscDlugosci = ""
 wartoscKata=""
-g=9.81
 uproszczony=0.0
 faktyczny=0.0
 
-white = (255, 255, 255)
-green = (0, 255, 0)
-blue = (0, 0, 128)
-turquoise = '#263d42'
+G=9.81
 
-start_message = "Podaj długość i kąt"
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 128)
+TURQUOISE = '#263d42'
 
+START_MESSAGE = "Podaj długość i kąt"
+NOT_ENOUGH_MESSAGE = "Niewystarczająca ilość danych"
 
 def integrand(kk, k):
     return 1/(np.sqrt(np.cos(kk)-np.cos(k)))
@@ -30,13 +33,10 @@ def showMessage(message):
     var.set(message)
     message_label.pack()
 
-
-
 def licz():
 
     wartoscDlugosci = text1.get("1.0","end")
     wartoscKata = text2.get("1.0","end")
-
 
     try:
 
@@ -47,38 +47,27 @@ def licz():
 
         text3.delete(1.0, "end")
         text4.delete(1.0, "end")
-        showMessage("Niewystarczająca ilość danych")
+        showMessage(NOT_ENOUGH_MESSAGE)
 
         return
 
-    showMessage(start_message)
+    showMessage(START_MESSAGE)
 
-    uproszczony = 2 * np.pi * np.sqrt(l / g)
-
-    roundOff = np.round_(uproszczony * 10000) / 10000
-
+    uproszczony = 2 * np.pi * np.sqrt(l / G)
+    roundOff = np.round_(uproszczony * 1000000000) / 1000000000
     text3.delete(1.0, "end")
     text3.insert(1.0, roundOff)
-
 
     radians = np.radians(k);
 
     faktyczny = quad(integrand, 0, radians, args=(radians))
-
-
-
-    roundOff2 = np.round(faktyczny[0] *  4 * np.sqrt(l/(2*g))*10000) / 10000;
+    roundOff2 = np.round(faktyczny[0] * 4 * np.sqrt(l / (2 * G)) * 1000000000) / 1000000000;
     text4.delete(1.0, "end")
     text4.insert(1.0,roundOff2)
 
 def rysuj():
 
-    # if sprawdzaj1() == 1:
-    #     return
-
-
     wartoscDlugosci = text1.get("1.0", "end")
-
 
     try:
 
@@ -88,10 +77,10 @@ def rysuj():
 
         text3.delete(1.0, "end")
         text4.delete(1.0, "end")
-        showMessage("Niewystarczająca ilość danych")
+        showMessage(NOT_ENOUGH_MESSAGE)
         return
 
-    showMessage(start_message)
+    showMessage(START_MESSAGE)
 
     dev_x = []
     dev_y1 = []
@@ -99,13 +88,13 @@ def rysuj():
 
     for x in range(90):
         dev_x.append(x+1)
-        uproszczony= 2 * np.pi * np.sqrt(l / g)
+        uproszczony= 2 * np.pi * np.sqrt(l / G)
         dev_y1.append(uproszczony)
         radians = np.radians(x+1)
 
         faktyczny = quad(integrand, 0, radians, args=(radians))
 
-        dev_y2.append(faktyczny[0]* 4 * np.sqrt(l/(2*g)))
+        dev_y2.append(faktyczny[0] * 4 * np.sqrt(l / (2 * G)))
 
     plt.plot(dev_x,dev_y1,  label="Prosty wzrór")
     plt.plot(dev_x, dev_y2,   label="Dokładny wzór całkowy")
@@ -133,7 +122,6 @@ def animacja():
         float(obliczona1)
         float(obliczona2)
 
-
     except:
 
         text3.delete(1.0, "end")
@@ -141,21 +129,19 @@ def animacja():
         showMessage("Najpierw wciśnij przycisk oblicz")
         return
 
-    showMessage(start_message)
+    showMessage(START_MESSAGE)
 
     pygame.init()
     pygame.display.set_caption('Animacja')
 
-    x_shift=400
-    y_shift=100
+    X_SHIFT=400
+    Y_SHIFT=100
 
-    speed=100
+    SPEED=60
     mode = 0
     mode2=0
     run = True
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-    red = (255, 0, 0)
+
 
     q1 = text2.get("1.0","end")
     swing=np.radians(float(q1))
@@ -166,108 +152,111 @@ def animacja():
     q3 = text4.get("1.0", "end")
     period2 = float(q3)
 
-    angle=np.pi/2
-    angle2=np.pi/2
-    # print(swing)
-    size = width, height = 800, 400
-    screen = pygame.display.set_mode(size)
+    angle=np.pi/2-swing
+    angle2=np.pi/2-swing
 
+    SIZE = WIDTH, HEIGHT = 800, 400
+    screen = pygame.display.set_mode(SIZE)
+
+
+    screen.fill(WHITE)
+
+    FONT = pygame.font.Font('freesansbold.ttf', 20)
+
+    mode_changes = 0
+    mode_changes2 = 0
     clock = pygame.time.Clock()
-    screen.fill(white)
-
-    font = pygame.font.Font('freesansbold.ttf', 20)
 
     while run:
-        clock.tick(speed*4)
 
-
-
-        # print(str(pygame.time.get_ticks()))
+        clock.tick_busy_loop(4*SPEED)
 
         time = int(pygame.time.get_ticks())
 
-        tekst_info = "okresy czarnego wahadła: " + str(int(time/(1000*period)))
-        tekst_info2= "okresy czerwonego wahadła: " + str(int(time/(1000*period2)))
+        tekst_info = "okresy czarnego wahadła: " + str(mode_changes)
+        tekst_info2 = "okresy czerwonego wahadła: " + str(mode_changes2)
         time_info = "czas: " + str(time) + " ms"
 
-        tekst = font.render(tekst_info, True, white, turquoise)
+        tekst = FONT.render(tekst_info, True, WHITE, TURQUOISE)
         tekstRect = tekst.get_rect()
         tekstRect.center = (200, 20)
 
-        tekst2 = font.render(tekst_info2, True, white, turquoise)
+        tekst2 = FONT.render(tekst_info2, True, WHITE, TURQUOISE)
         tekstRect2 = tekst2.get_rect()
         tekstRect2.center = (600, 20)
 
-        tekst3 = font.render(time_info, True, white, turquoise)
+        tekst3 = FONT.render(time_info, True, WHITE, TURQUOISE)
         tekstRect3 = tekst3.get_rect()
         tekstRect3.center = (400, 250)
-
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
 
-        screen.fill(turquoise)
+        screen.fill(TURQUOISE)
         screen.blit(tekst, tekstRect)
         screen.blit(tekst2, tekstRect2)
         screen.blit(tekst3, tekstRect3)
 
-        # pygame.display.update()
+        #pygame.display.update()
 
-        pygame.draw.circle(screen, black, (int(math.cos(angle) * 100) + x_shift, int(math.sin(angle) * 100) + y_shift), 10)
+        pygame.draw.circle(screen, BLACK, (int(math.cos(angle) * 100) + X_SHIFT, int(math.sin(angle) * 100) + Y_SHIFT), 10)
 
-        pygame.draw.line(screen, black, (x_shift,y_shift), (int(math.cos(angle) * 100) + x_shift, int(math.sin(angle) * 100) + y_shift), 5)
+        pygame.draw.line(screen, BLACK, (X_SHIFT,Y_SHIFT), (int(math.cos(angle) * 100) + X_SHIFT, int(math.sin(angle) * 100) + Y_SHIFT), 5)
 
-        pygame.draw.circle(screen, red, (int(math.cos(angle2) * 100) + x_shift, int(math.sin(angle2) * 100) + y_shift), 10)
+        pygame.draw.circle(screen, RED, (int(math.cos(angle2) * 100) + X_SHIFT, int(math.sin(angle2) * 100) + Y_SHIFT), 10)
 
-        pygame.draw.line(screen, red, (x_shift, y_shift), (int(math.cos(angle2) * 100) + x_shift, int(math.sin(angle2) * 100) + y_shift), 5)
+        pygame.draw.line(screen, RED, (X_SHIFT, Y_SHIFT), (int(math.cos(angle2) * 100) + X_SHIFT, int(math.sin(angle2) * 100) + Y_SHIFT), 5)
 
-
-        pygame.draw.line(screen, black, (300, y_shift), (500, y_shift), 5)
-
+        pygame.draw.line(screen, BLACK, (300, Y_SHIFT), (500, Y_SHIFT), 5)
 
         pygame.display.flip()
 
-
-
         if mode == 0:
-            angle = angle + swing/(period*speed)
+            angle = angle + (swing/(period*SPEED))
+
         else:
-            angle = angle - swing/(period*speed)
+            angle = angle - swing/(period*SPEED)
 
         if mode2 == 0:
-            angle2 = angle2 + swing / (period2 *speed)
+            angle2 = angle2 + swing / (period2 *SPEED)
         else:
-            angle2 = angle2 - swing / (period2 *speed)
+            angle2 = angle2 - swing / (period2 *SPEED)
 
+        previous_mode= mode
+        previous_mode2 = mode2
 
         if angle > np.pi / 2 + swing:
             mode = 1
         if angle < np.pi / 2 - swing:
              mode = 0
 
+        if mode != previous_mode and mode ==0:
+            mode_changes=mode_changes+1
+            print("czarne")
+            print(mode_changes)
 
         if angle2 > np.pi / 2 + swing:
             mode2 = 1
         if angle2 < np.pi / 2 - swing:
              mode2 = 0
 
-
+        if mode2 != previous_mode2 and mode2 ==0:
+            mode_changes2=mode_changes2+1
+            print("czerwone")
+            print(mode_changes2)
 
     pygame.quit()
-
-
-
 
 #interfejs graficzny
 
 buttons_height=300
-message = start_message
+message = START_MESSAGE
 
 root = tk.Tk()
 root.title('Zależność okresu wahadła od wychylenia')
 
-canvas = tk.Canvas(root, height = 400, width = 700, bg=turquoise)
+canvas = tk.Canvas(root, height = 400, width = 700, bg=TURQUOISE)
 canvas.pack()
 
 frame = tk.Frame(root, bg = "white")
@@ -284,25 +273,25 @@ text3.place(x = 500, y= 100)
 text4 = tk.Text(root, width=20,height=3)
 text4.place(x = 500, y= 200)
 
-label1 = tk.Label(root, height=3, bg=turquoise,fg="white", text = "Podaj długość [m]")
+label1 = tk.Label(root, height=3, bg=TURQUOISE, fg="white", text ="Podaj długość [m]")
 label1.place(x = 10, y = 100)
 
-label2 = tk.Label(root, height=3, bg=turquoise,fg="white", text = "Podaj kąt [°]")
+label2 = tk.Label(root, height=3, bg=TURQUOISE, fg="white", text ="Podaj kąt [°]")
 label2.place(x = 10, y = 200)
 
-label3 = tk.Label(root, height=3, bg=turquoise,fg="white", text = "wynik uproszczony [s]")
+label3 = tk.Label(root, height=3, bg=TURQUOISE, fg="white", text ="wynik uproszczony [s]")
 label3.place(x = 370, y = 100)
 
-label4 = tk.Label(root, height=3, bg=turquoise,fg="white", text = "wynik faktyczny [s]")
+label4 = tk.Label(root, height=3, bg=TURQUOISE, fg="white", text ="wynik faktyczny [s]")
 label4.place(x = 370, y = 200)
 
-pokaz_wynik= tk.Button(root, text="Pokaż wynik", padx = 10, pady = 10, fg="white", bg=turquoise, width=10, height= 3, command=licz)
+pokaz_wynik= tk.Button(root, text="Pokaż wynik", padx = 10, pady = 10, fg="white", bg=TURQUOISE, width=10, height= 3, command=licz)
 pokaz_wynik.place(x = 40, y= buttons_height)
 
-rysuj_wykres= tk.Button(root, text="Rysuj wykers zależności okresu od kąta", padx = 10, pady = 10, fg="white", bg=turquoise, width=30, height= 3, command=rysuj)
+rysuj_wykres= tk.Button(root, text="Rysuj wykers zależności okresu od kąta", padx = 10, pady = 10, fg="white", bg=TURQUOISE, width=30, height= 3, command=rysuj)
 rysuj_wykres.place(x = 140, y= buttons_height)
 
-animacja= tk.Button(root, text="Animacja", padx = 10, pady = 10, fg="white", bg=turquoise, width=30, height= 3, command=animacja)
+animacja= tk.Button(root, text="Animacja", padx = 10, pady = 10, fg="white", bg=TURQUOISE, width=30, height= 3, command=animacja)
 animacja.place(x = 380, y= buttons_height)
 
 var = tk.StringVar()
@@ -311,7 +300,6 @@ message_label = tk.Label( root, textvariable=var, relief = tk.RAISED )
 var.set(message)
 
 message_label.pack()
-
 
 root.resizable(False, False)
 
