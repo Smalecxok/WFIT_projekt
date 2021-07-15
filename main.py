@@ -233,8 +233,6 @@ def animacja():
 
         if mode != previous_mode and mode ==0:
             mode_changes=mode_changes+1
-            print("czarne")
-            print(mode_changes)
 
         if angle2 > np.pi / 2 + swing:
             mode2 = 1
@@ -243,8 +241,6 @@ def animacja():
 
         if mode2 != previous_mode2 and mode2 ==0:
             mode_changes2=mode_changes2+1
-            print("czerwone")
-            print(mode_changes2)
 
     pygame.quit()
 
